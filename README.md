@@ -1,1 +1,1 @@
-"# SiPM2x2" 
+"2x2 Scintillator Simulation" 
