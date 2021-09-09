@@ -132,6 +132,14 @@ using namespace std;
             {                       //mu-
               particleName = "mu-";
             }
+	  else if ( fPartId == 13 )
+            {                       //n
+              particleName = "neutron";
+            }
+	  else if ( fPartId == 14 )
+            {                       //p
+              particleName = "proton";
+            }
           else //do not simulate other particles
           continue;
           fTimeDelay=0.0;
