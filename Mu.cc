@@ -34,59 +34,65 @@ using namespace std;
    G4String filename; 
    G4String session;
    // construct the default run manager
-
-   G4RunManager* runManager = new G4RunManager;
+#ifdef G4MULTITHREADED
+  G4MTRunManager *runManager = new G4MTRunManager;
+#else
+  G4RunManager *runManager = new G4RunManager;
+#endif
    MuHistoManager*  histo = new MuHistoManager(&filename);
 
    // set mandatory initialization classes
-   runManager->SetUserInitialization(new MuDetectorConstruction);
-   runManager->SetUserInitialization(new MuPhysicsList);
-
-
-  G4UIExecutive* ui = 0;
-  ui = new G4UIExecutive(argc, argv, session);
-  G4UImanager* UImanager = G4UImanager::GetUIpointer();
-
+  runManager->SetUserInitialization(new MuDetectorConstruction);
+  runManager->SetUserInitialization(new MuPhysicsList);
 
   runManager->SetUserAction(new MuPrimaryGeneratorAction);
-
 
   MuRecorderBase* recorder = NULL; 
   runManager->SetUserAction(new MuTrackingAction(recorder));
   runManager->SetUserAction(new MuSteppingAction(recorder,histo));
 
-  #ifdef G4VIS_USE
-  G4VisManager* visManager = new G4VisExecutive;
-  visManager->Initialize();
-  #endif
+
 
   runManager->Initialize();
   G4UImanager* UI = G4UImanager::GetUIpointer();
 
    // GUI mode (Argument : ./Mu)
    if(argc==1){
+  #ifdef G4VIS_USE
+    G4VisManager* visManager = new G4VisExecutive;
+    visManager->Initialize();
+  #endif
+	   
+    // INTERFACE MANAGER
+    G4UIExecutive *ui = 0;
+    ui = new G4UIExecutive(argc, argv, session);
 
-   // get the pointer to the UI manager and set verbosities
-   
+    // get the pointer to the UI manager and set verbosities
+   G4UImanager *UI = G4UImanager::GetUIpointer();
    UI->ApplyCommand("/run/verbose 0");
    UI->ApplyCommand("/tracking/verbose 0");
-   UImanager->ApplyCommand("/control/execute init_vis.mac");
+   UI->ApplyCommand("/control/execute init_vis.mac");
 
 
     if (ui->IsGUI()) {
-      UImanager->ApplyCommand("/control/execute gui.mac");
+      UI->ApplyCommand("/control/execute gui.mac");
     }
     ui->SessionStart();
     delete ui;
+#ifdef G4VIS_USE 
     delete visManager;
+#endif
+    
 
     }
 
    // terminal mode (Argument: ./Mu + data_name.dat + output_name.dat)
    else if(argc==3){
 
-    UI->ApplyCommand("/run/verbose 0");
-    UI->ApplyCommand("/tracking/verbose 0");
+
+    G4UImanager *UImanager = G4UImanager::GetUIpointer();
+    UImanager->ApplyCommand("/run/verbose 2");
+    UImanager->ApplyCommand("/tracking/verbose 0");
 
 
     filename = argv[2];
